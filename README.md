@@ -27,6 +27,8 @@ Project ini dibuat untuk membantu proses voting menjadi lebih mudah, cepat, dan 
    ```bash
    pip install -r requirements.txt
 
-3. python app.py
+3. Jalankan Server
+   python app.py
 
-4. http://127.0.0.1:5000/
+4. BUka Browser & Akses
+   http://127.0.0.1:5000/
