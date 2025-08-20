@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Voting System - Vote</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .voting-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .candidate-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .candidate-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8f9ff, #ffffff);
+        }
+
+        .candidate-card.voted {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .candidate-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .candidate-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .candidate-info h3 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .project-title {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .candidate-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .team-members {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .vote-count {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .vote-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .vote-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .vote-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-vote {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0 10px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(46, 204, 113, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .view-results-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0 10px;
+        }
+
+        .view-results-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .already-voted {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .already-voted h2 {
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .already-voted p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            background: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            color: white;
+            font-size: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .candidates-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                position: relative;
+                padding-top: 60px;
+            }
+            
+            .logout-btn {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    
+    <div class="header">
+        <h1>🗳️ Hackathon Voting</h1>
+        <div class="user-info">
+            Welcome, <span id="username"></span>!
+        </div>
+    </div>
+
+    <div class="voting-container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Loading candidates...
+        </div>
+
+        <div id="votingInterface" style="display: none;">
+            <div class="candidates-grid" id="candidatesGrid">
+                <!-- Candidates will be loaded here -->
+            </div>
+
+            <div class="submit-vote" id="submitSection">
+                <h3 style="margin-bottom: 20px; color: #333;">Ready to submit your vote?</h3>
+                <p style="color: #666; margin-bottom: 30px;">
+                    Selected: <span id="selectedCandidate" style="color: #667eea; font-weight: 600;">None</span>
+                </p>
+                <button class="submit-btn" id="submitBtn" onclick="submitVote()" disabled>
+                    Submit Vote
+                </button>
+                <button class="view-results-btn" onclick="viewResults()">
+                    View Results
+                </button>
+            </div>
+        </div>
+
+        <div id="alreadyVoted" style="display: none;">
+            <div class="already-voted">
+                <div class="checkmark">✓</div>
+                <h2>Thank You!</h2>
+                <p>You have already submitted your vote for this hackathon. Your participation is greatly appreciated!</p>
+                <button class="view-results-btn" onclick="viewResults()">
+                    View Results
+                </button>
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000/api';
+        let selectedCandidateId = null;
+        let userToken = null;
+        let userData = null;
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuthentication();
+        });
+
+        function checkAuthentication() {
+            userToken = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            if (!userToken || !userStr) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                userData = JSON.parse(userStr);
+                
+                // Check if user is admin
+                if (userData.role === 'admin') {
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                // Set username
+                document.getElementById('username').textContent = userData.username;
+
+                // Check if user has already voted
+                if (userData.has_voted) {
+                    showAlreadyVoted();
+                } else {
+                    loadCandidates();
+                }
+                
+            } catch (e) {
+                console.error('Invalid user data:', e);
+                logout();
+            }
+        }
+
+        function showAlreadyVoted() {
+            document.getElementById('votingInterface').style.display = 'none';
+            document.getElementById('alreadyVoted').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function loadCandidates() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                
+                const response = await fetch(`${API_BASE}/candidates`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.status === 401) {
+                    throw new Error('Session expired');
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to load candidates');
+                }
+
+                const candidates = await response.json();
+                displayCandidates(candidates);
+                
+            } catch (error) {
+                console.error('Error loading candidates:', error);
+                if (error.message === 'Session expired') {
+                    logout();
+                } else {
+                    showMessage('Failed to load candidates. Please refresh the page.', 'error');
+                }
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayCandidates(candidates) {
+            const grid = document.getElementById('candidatesGrid');
+            grid.innerHTML = '';
+
+            candidates.forEach(candidate => {
+                const card = createCandidateCard(candidate);
+                grid.appendChild(card);
+            });
+
+            document.getElementById('votingInterface').style.display = 'block';
+        }
+
+        function createCandidateCard(candidate) {
+            const card = document.createElement('div');
+            card.className = 'candidate-card';
+            card.onclick = () => selectCandidate(candidate.id, candidate.name);
+
+            const avatar = candidate.name.charAt(0).toUpperCase();
+            
+            card.innerHTML = `
+                <div class="candidate-header">
+                    <div class="candidate-avatar">${avatar}</div>
+                    <div class="candidate-info">
+                        <h3>${candidate.name}</h3>
+                        <div class="project-title">${candidate.project_title}</div>
+                    </div>
+                </div>
+                <div class="candidate-description">${candidate.description}</div>
+                <div class="team-members">
+                    <strong>Team:</strong> ${candidate.team_members}
+                </div>
+                <div class="vote-count">
+                    Current votes: ${candidate.votes_count}
+                </div>
+            `;
+
+            return card;
+        }
+
+        function selectCandidate(candidateId, candidateName) {
+            // Remove previous selection
+            document.querySelectorAll('.candidate-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selection to current card
+            event.currentTarget.classList.add('selected');
+
+            selectedCandidateId = candidateId;
+            document.getElementById('selectedCandidate').textContent = candidateName;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        async function submitVote() {
+            if (!selectedCandidateId) {
+                showMessage('Please select a candidate first.', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+
+                const response = await fetch(`${API_BASE}/vote`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        candidate_id: selectedCandidateId
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Vote submitted successfully! Thank you for participating.', 'success');
+                    
+                    // Update user data
+                    userData.has_voted = true;
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    
+                    // Show thank you message after delay
+                    setTimeout(() => {
+                        showAlreadyVoted();
+                    }, 2000);
+                    
+                } else {
+                    throw new Error(data.message || 'Failed to submit vote');
+                }
+                
+            } catch (error) {
+                console.error('Error submitting vote:', error);
+                if (error.message.includes('already voted')) {
+                    userData.has_voted = true;
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    showAlreadyVoted();
+                } else {
+                    showMessage(error.message || 'Failed to submit vote. Please try again.', 'error');
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        }
+
+        function viewResults() {
+            window.location.href = '/results';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            container.appendChild(messageDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        // Add some visual feedback
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('candidate-card')) {
+                e.target.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    e.target.style.transform = '';
+                }, 150);
+            }
+        });
+    </script>
+</body>
+</html>
