@@ -30,5 +30,5 @@ Project ini dibuat untuk membantu proses voting menjadi lebih mudah, cepat, dan 
 3. Jalankan Server
    python app.py
 
-4. BUka Browser & Akses
+4. Buka Browser & Akses
    http://127.0.0.1:5000/
